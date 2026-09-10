@@ -10,7 +10,8 @@
     "dev": "concurrently \"npm run dev:fe\" \"npm run dev:be\"",
     "build:fe": "npm -w @games/frontend run build",
     "build:be": "npm -w @games/backend run build",
-    "migrate": "ts-node --project packages/backend/tsconfig.json -r tsconfig-paths/register scripts/migrate.ts"
+    "migrate": "ts-node --project packages/backend/tsconfig.json -r tsconfig-paths/register scripts/migrate.ts",
+    "seed:themes": "ts-node --project packages/backend/tsconfig.json -r tsconfig-paths/register scripts/seedThemes.ts"
   },
   "devDependencies": {
     "concurrently": "^9.1.0",

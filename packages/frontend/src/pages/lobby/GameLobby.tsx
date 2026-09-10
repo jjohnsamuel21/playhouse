@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { getPlugin } from '../../registry/gameRegistry';
+import { GAME_VISUALS } from '../../registry/gameVisuals';
+import NavBar from '../../components/NavBar';
 import type { ThemeDoc } from '@games/shared';
 
 export default function GameLobby() {
@@ -9,6 +11,7 @@ export default function GameLobby() {
   const navigate = useNavigate();
   const { getToken } = useAuth();
   const plugin = getPlugin(gameId!);
+  const visual = GAME_VISUALS[plugin.meta.id];
 
   const [joinCode, setJoinCode] = useState('');
   const [maxPlayers, setMaxPlayers] = useState(plugin.meta.maxPlayers);
@@ -54,82 +57,124 @@ export default function GameLobby() {
     }
   }
 
+  function incPlayers() {
+    setMaxPlayers((n) => Math.min(plugin.meta.maxPlayers, n + 1));
+  }
+  function decPlayers() {
+    setMaxPlayers((n) => Math.max(plugin.meta.minPlayers, n - 1));
+  }
+
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center p-6">
-      <div className="w-full max-w-sm space-y-6">
-        <button onClick={() => navigate('/')} className="text-gray-400 hover:text-white flex items-center gap-2">
+    <div className="page-layer min-h-screen animate-fadeUp">
+      <NavBar />
+      <div className="max-w-[760px] mx-auto px-6 pt-10 pb-20">
+        <span
+          onClick={() => navigate('/')}
+          className="text-sm text-playhouse-text-secondary hover:text-playhouse-text-primary cursor-pointer transition-colors"
+        >
           ← Back
-        </button>
-        <div>
-          <h1 className="text-2xl font-bold">{plugin.meta.iconEmoji} {plugin.meta.displayName}</h1>
-          <p className="text-gray-400 text-sm mt-1">Multiplayer · {plugin.meta.minPlayers}–{plugin.meta.maxPlayers} players</p>
+        </span>
+
+        <div className="flex items-center gap-3.5 mt-[22px] mb-2">
+          <div
+            className="w-[46px] h-[46px] rounded-[13px] flex items-center justify-center font-display font-bold text-[19px]"
+            style={{ background: visual.gradient }}
+          >
+            {visual.glyph}
+          </div>
+          <div>
+            <h1 className="font-display font-bold text-2xl text-playhouse-text-primary m-0">
+              {plugin.meta.displayName}
+            </h1>
+            <p className="text-playhouse-text-secondary text-[13.5px] mt-1 m-0">
+              Multiplayer · {plugin.meta.minPlayers}–{plugin.meta.maxPlayers} players
+            </p>
+          </div>
         </div>
 
-        {/* Create room */}
-        <div className="bg-gray-900 rounded-2xl p-5 space-y-4">
-          <h2 className="font-semibold">Create Room</h2>
+        <div className="flex flex-wrap gap-5 mt-7">
+          {/* Create a room */}
+          <div className="flex-[1_1_320px] bg-playhouse-surface border border-white/[0.06] rounded-[18px] p-6">
+            <h2 className="font-display text-base font-semibold mb-5 text-playhouse-text-primary">
+              Create a room
+            </h2>
 
-          <label className="block">
-            <span className="text-sm text-gray-400">Theme</span>
+            <p className="text-[13px] text-playhouse-text-secondary mb-2">Theme</p>
             {themesLoading ? (
-              <div className="mt-1 text-gray-500 text-sm">Loading themes…</div>
+              <div className="text-playhouse-text-tertiary text-sm mb-[22px]">Loading themes…</div>
             ) : (
-              <select
-                value={themeId}
-                onChange={(e) => setThemeId(e.target.value)}
-                className="mt-1 w-full bg-gray-800 rounded-lg px-3 py-2 text-white"
-              >
-                {themes.map((t) => (
-                  <option key={t.id} value={t.id}>{t.name}</option>
-                ))}
-              </select>
+              <div className="flex flex-wrap gap-2 mb-[22px]">
+                {themes.map((t) => {
+                  const active = t.id === themeId;
+                  return (
+                    <span
+                      key={t.id}
+                      onClick={() => setThemeId(t.id)}
+                      className={`px-3.5 py-2 rounded-full text-[13px] cursor-pointer border transition-all ${
+                        active
+                          ? 'border-playhouse-accent-primary bg-[rgba(224,71,158,0.14)] text-playhouse-text-primary'
+                          : 'border-white/10 text-playhouse-text-secondary'
+                      }`}
+                    >
+                      {t.name}
+                    </span>
+                  );
+                })}
+              </div>
             )}
-          </label>
 
-          <label className="block">
-            <span className="text-sm text-gray-400">Max players</span>
-            <select
-              value={maxPlayers}
-              onChange={(e) => setMaxPlayers(Number(e.target.value))}
-              className="mt-1 w-full bg-gray-800 rounded-lg px-3 py-2 text-white"
+            <p className="text-[13px] text-playhouse-text-secondary mb-2">Max players</p>
+            <div className="flex items-center gap-3.5 mb-6">
+              <button
+                onClick={decPlayers}
+                className="w-[34px] h-[34px] rounded-full border border-white/10 bg-transparent text-playhouse-text-primary text-base"
+              >
+                −
+              </button>
+              <span className="font-display font-bold text-lg w-5 text-center text-playhouse-text-primary">
+                {maxPlayers}
+              </span>
+              <button
+                onClick={incPlayers}
+                className="w-[34px] h-[34px] rounded-full border border-white/10 bg-transparent text-playhouse-text-primary text-base"
+              >
+                +
+              </button>
+            </div>
+
+            <button
+              onClick={createRoom}
+              disabled={loading || !themeId || themesLoading}
+              className="w-full py-[13px] rounded-xl font-bold text-[14.5px] text-white disabled:opacity-50 transition-opacity hover:opacity-90"
+              style={{ background: 'linear-gradient(135deg,#e0479e,#a855f7)' }}
             >
-              {Array.from(
-                { length: plugin.meta.maxPlayers - plugin.meta.minPlayers + 1 },
-                (_, i) => plugin.meta.minPlayers + i
-              ).map((n) => (
-                <option key={n} value={n}>{n} players</option>
-              ))}
-            </select>
-          </label>
+              {loading ? 'Creating…' : 'Create Room'}
+            </button>
+          </div>
 
-          <button
-            onClick={createRoom}
-            disabled={loading || !themeId || themesLoading}
-            className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 rounded-xl font-semibold transition-colors"
-          >
-            {loading ? 'Creating…' : 'Create Room'}
-          </button>
-        </div>
-
-        <div className="text-center text-gray-600 text-sm">— or —</div>
-
-        {/* Join room */}
-        <div className="bg-gray-900 rounded-2xl p-5 space-y-4">
-          <h2 className="font-semibold">Join Room</h2>
-          <input
-            value={joinCode}
-            onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-            placeholder="Enter 6-char code"
-            maxLength={6}
-            className="w-full bg-gray-800 rounded-lg px-3 py-2 text-white font-mono tracking-widest text-center placeholder:text-gray-600"
-          />
-          <button
-            onClick={joinRoom}
-            disabled={joinCode.length !== 6}
-            className="w-full py-3 bg-gray-700 hover:bg-gray-600 disabled:opacity-40 rounded-xl font-semibold transition-colors"
-          >
-            Join Room
-          </button>
+          {/* Join a room */}
+          <div className="flex-[1_1_260px] bg-playhouse-surface border border-white/[0.06] rounded-[18px] p-6 flex flex-col">
+            <h2 className="font-display text-base font-semibold mb-5 text-playhouse-text-primary">
+              Join a room
+            </h2>
+            <input
+              value={joinCode}
+              onChange={(e) => setJoinCode(e.target.value.toUpperCase().slice(0, 6))}
+              placeholder="6-character code"
+              maxLength={6}
+              className="w-full bg-playhouse-bg border border-white/10 rounded-[10px] p-3 text-playhouse-text-primary font-mono tracking-[0.2em] text-center uppercase text-sm placeholder:text-playhouse-text-tertiary"
+            />
+            <div className="flex-1" />
+            <button
+              onClick={joinRoom}
+              disabled={joinCode.length !== 6}
+              className={`w-full mt-5 py-[13px] rounded-xl font-bold text-[14.5px] border border-white/[0.14] bg-transparent transition-colors ${
+                joinCode.length === 6 ? 'text-playhouse-text-primary' : 'text-playhouse-text-tertiary'
+              }`}
+            >
+              Join Room
+            </button>
+          </div>
         </div>
       </div>
     </div>

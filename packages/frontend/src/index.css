@@ -4,45 +4,25 @@
 
 @layer base {
   body {
-    @apply bg-gray-950 text-white antialiased;
-    /* subtle dot grid — gives particle canvas depth + texture */
-    background-image: radial-gradient(
-      circle,
-      rgba(255, 255, 255, 0.035) 1px,
-      transparent 1px
-    );
-    background-size: 28px 28px;
+    @apply bg-playhouse-bg text-playhouse-text-primary antialiased;
   }
 }
 
 @layer utilities {
-  /* page wrappers sit above canvas (z-0) */
+  /* page wrappers sit above the ambient glow (z-index:-1) */
   .page-layer {
     position: relative;
     z-index: 1;
   }
 
-  /* sitewide ambient glow, behind canvas (z-0) and page-layer (z-1) */
+  /* sitewide ambient glow, fixed behind everything */
   .atmosphere-glow {
     position: fixed;
     inset: 0;
     z-index: -1;
     pointer-events: none;
     background-image:
-      radial-gradient(circle at 20% 15%, rgba(139, 92, 246, 0.16), transparent 45%),
-      radial-gradient(circle at 80% 85%, rgba(34, 211, 238, 0.12), transparent 45%);
-  }
-
-  .text-glow-violet {
-    text-shadow: 0 0 20px rgba(139, 92, 246, 0.55), 0 0 48px rgba(139, 92, 246, 0.25);
-  }
-  .text-glow-cyan {
-    text-shadow: 0 0 20px rgba(34, 211, 238, 0.55), 0 0 48px rgba(34, 211, 238, 0.25);
-  }
-  .text-glow-pink {
-    text-shadow: 0 0 20px rgba(244, 114, 182, 0.55), 0 0 48px rgba(244, 114, 182, 0.25);
-  }
-  .text-glow-amber {
-    text-shadow: 0 0 20px rgba(251, 191, 36, 0.55), 0 0 48px rgba(251, 191, 36, 0.25);
+      radial-gradient(circle at 12% 8%, rgba(224, 71, 158, 0.14), transparent 40%),
+      radial-gradient(circle at 88% 92%, rgba(168, 85, 247, 0.12), transparent 42%);
   }
 }

@@ -3,8 +3,6 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { SocketProvider } from './contexts/SocketContext';
 import AuthGuard from './components/AuthGuard';
-import ParticleCanvas from './components/ParticleCanvas';
-import AmbientAudioToggle from './components/AmbientAudioToggle';
 import Login from './pages/Login';
 import Home from './pages/Home';
 import Profile from './pages/Profile';
@@ -20,8 +18,6 @@ export default function App() {
     <AuthProvider>
       <SocketProvider>
         <div aria-hidden="true" className="atmosphere-glow" />
-        <ParticleCanvas />
-        <AmbientAudioToggle />
         <BrowserRouter>
           <Routes>
             {/* Public */}

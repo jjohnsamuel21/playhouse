@@ -6,7 +6,7 @@ import { rankingPlugin } from './plugins/rankingPlugin';
 
 export interface RouteDefinition {
   path: string;
-  component: React.ComponentType;
+  component: React.LazyExoticComponent<React.ComponentType> | React.ComponentType;
 }
 
 export interface FrontendGamePlugin {

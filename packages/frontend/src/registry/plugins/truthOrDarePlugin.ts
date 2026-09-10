@@ -1,8 +1,10 @@
-import TodThemeSelect from '../../pages/games/truth-or-dare/ThemeSelect';
-import TodGameBoard from '../../pages/games/truth-or-dare/GameBoard';
-import LocalPlayerSetup from '../../components/LocalPlayerSetup';
+import { lazy } from 'react';
 import type { FrontendGamePlugin } from '../gameRegistry';
 import type { TruthOrDareContent } from '@games/shared';
+
+const TodThemeSelect = lazy(() => import('../../pages/games/truth-or-dare/ThemeSelect'));
+const TodGameBoard = lazy(() => import('../../pages/games/truth-or-dare/GameBoard'));
+const LocalPlayerSetup = lazy(() => import('../../components/LocalPlayerSetup'));
 
 export const truthOrDarePlugin: FrontendGamePlugin = {
   meta: {

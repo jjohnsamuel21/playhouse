@@ -1,8 +1,10 @@
-import RankThemeSelect from '../../pages/games/ranking/ThemeSelect';
-import RankGameBoard from '../../pages/games/ranking/GameBoard';
-import LocalPlayerSetup from '../../components/LocalPlayerSetup';
+import { lazy } from 'react';
 import type { FrontendGamePlugin } from '../gameRegistry';
 import type { RankingContent } from '@games/shared';
+
+const RankThemeSelect = lazy(() => import('../../pages/games/ranking/ThemeSelect'));
+const RankGameBoard = lazy(() => import('../../pages/games/ranking/GameBoard'));
+const LocalPlayerSetup = lazy(() => import('../../components/LocalPlayerSetup'));
 
 export const rankingPlugin: FrontendGamePlugin = {
   meta: {

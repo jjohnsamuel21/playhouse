@@ -1,8 +1,10 @@
-import TotThemeSelect from '../../pages/games/this-or-that/ThemeSelect';
-import TotGameBoard from '../../pages/games/this-or-that/GameBoard';
-import LocalPlayerSetup from '../../components/LocalPlayerSetup';
+import { lazy } from 'react';
 import type { FrontendGamePlugin } from '../gameRegistry';
 import type { ThisOrThatContent } from '@games/shared';
+
+const TotThemeSelect = lazy(() => import('../../pages/games/this-or-that/ThemeSelect'));
+const TotGameBoard = lazy(() => import('../../pages/games/this-or-that/GameBoard'));
+const LocalPlayerSetup = lazy(() => import('../../components/LocalPlayerSetup'));
 
 export const thisOrThatPlugin: FrontendGamePlugin = {
   meta: {

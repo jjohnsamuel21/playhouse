@@ -1,5 +1,6 @@
 import RankThemeSelect from '../../pages/games/ranking/ThemeSelect';
 import RankGameBoard from '../../pages/games/ranking/GameBoard';
+import LocalPlayerSetup from '../../components/LocalPlayerSetup';
 import type { FrontendGamePlugin } from '../gameRegistry';
 import type { RankingContent } from '@games/shared';
 
@@ -16,6 +17,7 @@ export const rankingPlugin: FrontendGamePlugin = {
   },
   routes: [
     { path: 'themes', component: RankThemeSelect },
+    { path: 'local-setup/:themeId', component: LocalPlayerSetup },
     { path: 'play/:themeId', component: RankGameBoard },
   ],
   llmInterestPrompts: [

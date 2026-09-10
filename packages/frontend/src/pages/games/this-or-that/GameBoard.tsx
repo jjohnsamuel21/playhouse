@@ -10,7 +10,7 @@ import ChatPanel from '../../../components/ChatPanel';
 import { MultiplayerBanners, GameEndedScreen } from '../../../components/MultiplayerBanners';
 import { useMultiplayerRoom } from '../../../hooks/useMultiplayerRoom';
 
-interface ChoiceRecord { pair: { a: string; b: string }; selected: string; }
+interface ChoiceRecord { pair: { a: string; b: string }; selected: string; player: string; }
 interface PlayerInfo { uid: string; displayName: string; photoURL: string; }
 
 export default function TotGameBoard() {
@@ -21,6 +21,8 @@ export default function TotGameBoard() {
   const { socket } = useSocket();
 
   const locationState = (location.state as {
+    firstPlayer?: string;
+    players?: string[];
     sessionId?: string;
     roomCode?: string;
     playerInfos?: PlayerInfo[];
@@ -34,6 +36,15 @@ export default function TotGameBoard() {
   const choicesRef = useRef<ChoiceRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [done, setDone] = useState(false);
+  // Solo/local pass-and-play turn state — round-robins one player per pair
+  const [players] = useState<string[]>(
+    locationState.players ?? [user?.displayName ?? 'Player 1']
+  );
+  const [playerIndex, setPlayerIndex] = useState(() => {
+    const i = locationState.firstPlayer ? players.indexOf(locationState.firstPlayer) : 0;
+    return i === -1 ? 0 : i;
+  });
+  const currentPlayer = players[playerIndex] ?? players[0];
 
   const saveHistory = useCallback(async () => {
     if (!user || !themeId || !theme) return;
@@ -80,10 +91,14 @@ export default function TotGameBoard() {
 
   function handleSelect(option: string) {
     const pair = pairs[round];
-    const choice: ChoiceRecord = { pair, selected: option };
+    const choice: ChoiceRecord = { pair, selected: option, player: currentPlayer };
     const newChoices = [...choices, choice];
     choicesRef.current = newChoices;
     setChoices(newChoices);
+
+    if (!isMultiplayer && players.length > 1) {
+      setPlayerIndex((playerIndex + 1) % players.length);
+    }
 
     if (round + 1 >= pairs.length) {
       saveHistory();
@@ -105,6 +120,9 @@ export default function TotGameBoard() {
           <div className="space-y-3 mb-8">
             {choices.map((c, i) => (
               <div key={i} className="bg-gray-900 rounded-xl p-4">
+                {players.length > 1 && (
+                  <p className="text-xs text-gray-500 mb-2">{c.player}</p>
+                )}
                 <div className="flex gap-3">
                   <div className={`flex-1 p-3 rounded-lg text-sm ${c.selected === c.pair.a ? 'bg-indigo-600' : 'bg-gray-800 text-gray-500'}`}>{c.pair.a}</div>
                   <div className={`flex-1 p-3 rounded-lg text-sm ${c.selected === c.pair.b ? 'bg-indigo-600' : 'bg-gray-800 text-gray-500'}`}>{c.pair.b}</div>
@@ -134,6 +152,9 @@ export default function TotGameBoard() {
         />
 
         <div className="text-center">
+          {!isMultiplayer && players.length > 1 && (
+            <p className="text-lg font-bold mb-1">{currentPlayer}'s turn</p>
+          )}
           <p className="text-gray-400 text-sm">{theme.name}</p>
           <p className="text-gray-500 text-xs mt-1">{round + 1} / {pairs.length}</p>
         </div>

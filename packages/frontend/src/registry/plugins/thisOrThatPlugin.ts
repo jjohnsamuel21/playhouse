@@ -1,5 +1,6 @@
 import TotThemeSelect from '../../pages/games/this-or-that/ThemeSelect';
 import TotGameBoard from '../../pages/games/this-or-that/GameBoard';
+import LocalPlayerSetup from '../../components/LocalPlayerSetup';
 import type { FrontendGamePlugin } from '../gameRegistry';
 import type { ThisOrThatContent } from '@games/shared';
 
@@ -16,6 +17,7 @@ export const thisOrThatPlugin: FrontendGamePlugin = {
   },
   routes: [
     { path: 'themes', component: TotThemeSelect },
+    { path: 'local-setup/:themeId', component: LocalPlayerSetup },
     { path: 'play/:themeId', component: TotGameBoard },
   ],
   llmInterestPrompts: [

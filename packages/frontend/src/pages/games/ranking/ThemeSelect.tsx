@@ -49,7 +49,7 @@ export default function RankThemeSelect() {
             {themes.map((theme) => (
               <button
                 key={theme.id}
-                onClick={() => navigate(`/game/ranking/play/${theme.id}`)}
+                onClick={() => navigate(`/game/ranking/local-setup/${theme.id}`)}
                 className="w-full bg-gray-900 hover:bg-gray-800 rounded-xl p-4 text-left transition-colors"
               >
                 <div className="flex items-center justify-between">

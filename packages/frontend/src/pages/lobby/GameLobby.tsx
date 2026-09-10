@@ -176,6 +176,24 @@ export default function GameLobby() {
             </button>
           </div>
         </div>
+
+        {/* Play locally */}
+        <div className="mt-5 bg-playhouse-surface border border-white/[0.06] rounded-[18px] p-6 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h2 className="font-display text-base font-semibold text-playhouse-text-primary mb-1">
+              Play locally on this device
+            </h2>
+            <p className="text-playhouse-text-secondary text-[13.5px]">
+              Pass the phone or laptop around — no room, no other devices needed.
+            </p>
+          </div>
+          <button
+            onClick={() => navigate(`/game/${gameId}/themes`)}
+            className="px-5 py-[11px] rounded-xl font-bold text-[14.5px] border border-white/[0.14] text-playhouse-text-primary bg-transparent hover:bg-white/[0.04] transition-colors shrink-0"
+          >
+            Play locally
+          </button>
+        </div>
       </div>
     </div>
   );

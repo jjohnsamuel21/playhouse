@@ -1,6 +1,6 @@
 import TodThemeSelect from '../../pages/games/truth-or-dare/ThemeSelect';
-import TodCoinToss from '../../pages/games/truth-or-dare/CoinToss';
 import TodGameBoard from '../../pages/games/truth-or-dare/GameBoard';
+import LocalPlayerSetup from '../../components/LocalPlayerSetup';
 import type { FrontendGamePlugin } from '../gameRegistry';
 import type { TruthOrDareContent } from '@games/shared';
 
@@ -17,7 +17,7 @@ export const truthOrDarePlugin: FrontendGamePlugin = {
   },
   routes: [
     { path: 'themes', component: TodThemeSelect },
-    { path: 'toss/:themeId', component: TodCoinToss },
+    { path: 'local-setup/:themeId', component: LocalPlayerSetup },
     { path: 'play/:themeId', component: TodGameBoard },
   ],
   llmInterestPrompts: [

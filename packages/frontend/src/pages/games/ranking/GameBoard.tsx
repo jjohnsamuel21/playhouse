@@ -17,6 +17,8 @@ export default function RankGameBoard() {
   const { user } = useAuth();
 
   const locationState = (location.state as {
+    firstPlayer?: string;
+    players?: string[];
     sessionId?: string;
     roomCode?: string;
     playerInfos?: PlayerInfo[];
@@ -29,6 +31,16 @@ export default function RankGameBoard() {
   const rankedRef = useRef<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [done, setDone] = useState(false);
+  // Solo/local pass-and-play turn state — round-robins whose turn it is to draft the next pick
+  const [players] = useState<string[]>(
+    locationState.players ?? [user?.displayName ?? 'Player 1']
+  );
+  const [playerIndex, setPlayerIndex] = useState(() => {
+    const i = locationState.firstPlayer ? players.indexOf(locationState.firstPlayer) : 0;
+    return i === -1 ? 0 : i;
+  });
+  const currentPlayer = players[playerIndex] ?? players[0];
+  const [pickedBy, setPickedBy] = useState<Record<string, string>>({});
 
   const saveHistory = useCallback(async () => {
     if (!user || !themeId || !theme) return;
@@ -76,6 +88,10 @@ export default function RankGameBoard() {
   function moveToRanked(item: string) {
     setUnranked((prev) => prev.filter((i) => i !== item));
     setRanked((prev) => { const next = [...prev, item]; rankedRef.current = next; return next; });
+    setPickedBy((prev) => ({ ...prev, [item]: currentPlayer }));
+    if (!isMultiplayer && players.length > 1) {
+      setPlayerIndex((playerIndex + 1) % players.length);
+    }
   }
 
   function moveUp(index: number) {
@@ -120,7 +136,10 @@ export default function RankGameBoard() {
             {ranked.map((item, i) => (
               <div key={item} className="bg-gray-900 rounded-xl p-4 flex items-center gap-4">
                 <span className="text-2xl font-bold text-indigo-400 w-8">#{i + 1}</span>
-                <span>{item}</span>
+                <span className="flex-1 text-left">{item}</span>
+                {players.length > 1 && pickedBy[item] && (
+                  <span className="text-xs text-gray-500">{pickedBy[item]}</span>
+                )}
               </div>
             ))}
           </div>
@@ -170,6 +189,9 @@ export default function RankGameBoard() {
 
         {unranked.length > 0 && (
           <div>
+            {!isMultiplayer && players.length > 1 && (
+              <p className="text-base font-bold mb-2">{currentPlayer}'s pick</p>
+            )}
             <h2 className="text-sm text-gray-400 uppercase tracking-wide mb-2">Not yet ranked</h2>
             <div className="space-y-2">
               {unranked.map((item) => (

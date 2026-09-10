@@ -1,0 +1,27 @@
+{
+  "name": "games-platform",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:fe": "npm -w @games/frontend run dev",
+    "dev:be": "npm -w @games/backend run dev",
+    "dev": "concurrently \"npm run dev:fe\" \"npm run dev:be\"",
+    "build:fe": "npm -w @games/frontend run build",
+    "build:be": "npm -w @games/backend run build",
+    "migrate": "ts-node --project packages/backend/tsconfig.json -r tsconfig-paths/register scripts/migrate.ts"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.6.3"
+  },
+  "volta": {
+    "node": "22.23.2"
+  },
+  "dependencies": {
+    "firebase-tools": "^15.27.0"
+  }
+}

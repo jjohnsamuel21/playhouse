@@ -1,0 +1,61 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(resource) {
+      return resource.data.ownerId == request.auth.uid;
+    }
+
+    // ── Users ─────────────────────────────────────────────────────────────────
+    match /users/{uid} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn() && request.auth.uid == uid;
+      allow delete: if false;
+    }
+
+    // ── Themes ────────────────────────────────────────────────────────────────
+    match /themes/{themeId} {
+      allow read: if isSignedIn() && (
+        resource.data.visibility == 'public' ||
+        resource.data.ownerId == request.auth.uid
+      );
+      allow create: if isSignedIn() &&
+        request.resource.data.ownerId == request.auth.uid;
+      allow update: if isSignedIn() && isOwner(resource);
+      allow delete: if isSignedIn() && isOwner(resource);
+    }
+
+    // ── Sessions ──────────────────────────────────────────────────────────────
+    match /sessions/{sessionId} {
+      allow read: if isSignedIn() &&
+        request.auth.uid in resource.data.playerIds;
+      allow create: if isSignedIn() &&
+        request.resource.data.hostId == request.auth.uid;
+      allow update: if isSignedIn() &&
+        request.auth.uid in resource.data.playerIds;
+      allow delete: if false;
+    }
+
+    // ── Rooms ─────────────────────────────────────────────────────────────────
+    match /rooms/{roomCode} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() &&
+        request.resource.data.hostId == request.auth.uid;
+      allow update: if isSignedIn() &&
+        request.auth.uid in resource.data.playerIds;
+      allow delete: if false;
+    }
+
+    // ── Game History ──────────────────────────────────────────────────────────
+    match /gameHistory/{historyId} {
+      allow read: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow create: if isSignedIn() &&
+        request.resource.data.uid == request.auth.uid;
+      allow update, delete: if false;
+    }
+  }
+}

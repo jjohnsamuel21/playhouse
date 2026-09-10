@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { getPlugin } from '../registry/gameRegistry';
 import NavBar from './NavBar';
 
 export default function LocalPlayerSetup() {
-  const { gameId, themeId } = useParams<{ gameId: string; themeId: string }>();
+  const { themeId } = useParams<{ themeId: string }>();
   const navigate = useNavigate();
-  const plugin = getPlugin(gameId!);
+  const location = useLocation();
+  // Route is registered per-plugin as `/game/<gameId>/local-setup/:themeId` —
+  // <gameId> is a literal segment baked in per plugin, not a route param.
+  const gameId = location.pathname.split('/')[2];
+  const plugin = getPlugin(gameId);
   const { minPlayers, maxPlayers } = plugin.meta;
 
   const [players, setPlayers] = useState<string[]>(

@@ -15,6 +15,7 @@ export const rankingPlugin: FrontendGamePlugin = {
     minPlayers: 1,
     maxPlayers: 4,
     supportsLLMGeneration: true,
+    supportsMultiplayer: true,
     themeColor: 'amber',
   },
   routes: [

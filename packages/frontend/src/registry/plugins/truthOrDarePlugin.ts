@@ -15,6 +15,7 @@ export const truthOrDarePlugin: FrontendGamePlugin = {
     minPlayers: 2,
     maxPlayers: 4,
     supportsLLMGeneration: true,
+    supportsMultiplayer: true,
     themeColor: 'pink',
   },
   routes: [

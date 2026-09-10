@@ -21,6 +21,7 @@ export default function GameLobby() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (!plugin.meta.supportsMultiplayer) return;
     getToken().then((token) =>
       fetch(`${import.meta.env.VITE_BACKEND_URL}/api/themes?gameId=${gameId}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -87,98 +88,100 @@ export default function GameLobby() {
               {plugin.meta.displayName}
             </h1>
             <p className="text-playhouse-text-secondary text-[13.5px] mt-1 m-0">
-              Multiplayer · {plugin.meta.minPlayers}–{plugin.meta.maxPlayers} players
+              {plugin.meta.supportsMultiplayer ? 'Multiplayer' : 'Local play'} · {plugin.meta.minPlayers}–{plugin.meta.maxPlayers} players
             </p>
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-5 mt-7">
-          {/* Create a room */}
-          <div className="flex-[1_1_320px] bg-playhouse-surface border border-white/[0.06] rounded-[18px] p-6">
-            <h2 className="font-display text-base font-semibold mb-5 text-playhouse-text-primary">
-              Create a room
-            </h2>
+        {plugin.meta.supportsMultiplayer && (
+          <div className="flex flex-wrap gap-5 mt-7">
+            {/* Create a room */}
+            <div className="flex-[1_1_320px] bg-playhouse-surface border border-white/[0.06] rounded-[18px] p-6">
+              <h2 className="font-display text-base font-semibold mb-5 text-playhouse-text-primary">
+                Create a room
+              </h2>
 
-            <p className="text-[13px] text-playhouse-text-secondary mb-2">Theme</p>
-            {themesLoading ? (
-              <div className="text-playhouse-text-tertiary text-sm mb-[22px]">Loading themes…</div>
-            ) : (
-              <div className="flex flex-wrap gap-2 mb-[22px]">
-                {themes.map((t) => {
-                  const active = t.id === themeId;
-                  return (
-                    <span
-                      key={t.id}
-                      onClick={() => setThemeId(t.id)}
-                      className={`px-3.5 py-2 rounded-full text-[13px] cursor-pointer border transition-all ${
-                        active
-                          ? 'border-playhouse-accent-primary bg-[rgba(224,71,158,0.14)] text-playhouse-text-primary'
-                          : 'border-white/10 text-playhouse-text-secondary'
-                      }`}
-                    >
-                      {t.name}
-                    </span>
-                  );
-                })}
+              <p className="text-[13px] text-playhouse-text-secondary mb-2">Theme</p>
+              {themesLoading ? (
+                <div className="text-playhouse-text-tertiary text-sm mb-[22px]">Loading themes…</div>
+              ) : (
+                <div className="flex flex-wrap gap-2 mb-[22px]">
+                  {themes.map((t) => {
+                    const active = t.id === themeId;
+                    return (
+                      <span
+                        key={t.id}
+                        onClick={() => setThemeId(t.id)}
+                        className={`px-3.5 py-2 rounded-full text-[13px] cursor-pointer border transition-all ${
+                          active
+                            ? 'border-playhouse-accent-primary bg-[rgba(224,71,158,0.14)] text-playhouse-text-primary'
+                            : 'border-white/10 text-playhouse-text-secondary'
+                        }`}
+                      >
+                        {t.name}
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
+
+              <p className="text-[13px] text-playhouse-text-secondary mb-2">Max players</p>
+              <div className="flex items-center gap-3.5 mb-6">
+                <button
+                  onClick={decPlayers}
+                  className="w-[34px] h-[34px] rounded-full border border-white/10 bg-transparent text-playhouse-text-primary text-base"
+                >
+                  −
+                </button>
+                <span className="font-display font-bold text-lg w-5 text-center text-playhouse-text-primary">
+                  {maxPlayers}
+                </span>
+                <button
+                  onClick={incPlayers}
+                  className="w-[34px] h-[34px] rounded-full border border-white/10 bg-transparent text-playhouse-text-primary text-base"
+                >
+                  +
+                </button>
               </div>
-            )}
 
-            <p className="text-[13px] text-playhouse-text-secondary mb-2">Max players</p>
-            <div className="flex items-center gap-3.5 mb-6">
               <button
-                onClick={decPlayers}
-                className="w-[34px] h-[34px] rounded-full border border-white/10 bg-transparent text-playhouse-text-primary text-base"
+                onClick={createRoom}
+                disabled={loading || !themeId || themesLoading}
+                className="w-full py-[13px] rounded-xl font-bold text-[14.5px] text-white disabled:opacity-50 transition-opacity hover:opacity-90"
+                style={{ background: 'linear-gradient(135deg,#e0479e,#a855f7)' }}
               >
-                −
-              </button>
-              <span className="font-display font-bold text-lg w-5 text-center text-playhouse-text-primary">
-                {maxPlayers}
-              </span>
-              <button
-                onClick={incPlayers}
-                className="w-[34px] h-[34px] rounded-full border border-white/10 bg-transparent text-playhouse-text-primary text-base"
-              >
-                +
+                {loading ? 'Creating…' : 'Create Room'}
               </button>
             </div>
 
-            <button
-              onClick={createRoom}
-              disabled={loading || !themeId || themesLoading}
-              className="w-full py-[13px] rounded-xl font-bold text-[14.5px] text-white disabled:opacity-50 transition-opacity hover:opacity-90"
-              style={{ background: 'linear-gradient(135deg,#e0479e,#a855f7)' }}
-            >
-              {loading ? 'Creating…' : 'Create Room'}
-            </button>
+            {/* Join a room */}
+            <div className="flex-[1_1_260px] bg-playhouse-surface border border-white/[0.06] rounded-[18px] p-6 flex flex-col">
+              <h2 className="font-display text-base font-semibold mb-5 text-playhouse-text-primary">
+                Join a room
+              </h2>
+              <input
+                value={joinCode}
+                onChange={(e) => setJoinCode(e.target.value.toUpperCase().slice(0, 6))}
+                placeholder="6-character code"
+                maxLength={6}
+                className="w-full bg-playhouse-bg border border-white/10 rounded-[10px] p-3 text-playhouse-text-primary font-mono tracking-[0.2em] text-center uppercase text-sm placeholder:text-playhouse-text-tertiary"
+              />
+              <div className="flex-1" />
+              <button
+                onClick={joinRoom}
+                disabled={joinCode.length !== 6}
+                className={`w-full mt-5 py-[13px] rounded-xl font-bold text-[14.5px] border border-white/[0.14] bg-transparent transition-colors ${
+                  joinCode.length === 6 ? 'text-playhouse-text-primary' : 'text-playhouse-text-tertiary'
+                }`}
+              >
+                Join Room
+              </button>
+            </div>
           </div>
-
-          {/* Join a room */}
-          <div className="flex-[1_1_260px] bg-playhouse-surface border border-white/[0.06] rounded-[18px] p-6 flex flex-col">
-            <h2 className="font-display text-base font-semibold mb-5 text-playhouse-text-primary">
-              Join a room
-            </h2>
-            <input
-              value={joinCode}
-              onChange={(e) => setJoinCode(e.target.value.toUpperCase().slice(0, 6))}
-              placeholder="6-character code"
-              maxLength={6}
-              className="w-full bg-playhouse-bg border border-white/10 rounded-[10px] p-3 text-playhouse-text-primary font-mono tracking-[0.2em] text-center uppercase text-sm placeholder:text-playhouse-text-tertiary"
-            />
-            <div className="flex-1" />
-            <button
-              onClick={joinRoom}
-              disabled={joinCode.length !== 6}
-              className={`w-full mt-5 py-[13px] rounded-xl font-bold text-[14.5px] border border-white/[0.14] bg-transparent transition-colors ${
-                joinCode.length === 6 ? 'text-playhouse-text-primary' : 'text-playhouse-text-tertiary'
-              }`}
-            >
-              Join Room
-            </button>
-          </div>
-        </div>
+        )}
 
         {/* Play locally */}
-        <div className="mt-5 bg-playhouse-surface border border-white/[0.06] rounded-[18px] p-6 flex flex-wrap items-center justify-between gap-4">
+        <div className={`${plugin.meta.supportsMultiplayer ? 'mt-5' : 'mt-7'} bg-playhouse-surface border border-white/[0.06] rounded-[18px] p-6 flex flex-wrap items-center justify-between gap-4`}>
           <div>
             <h2 className="font-display text-base font-semibold text-playhouse-text-primary mb-1">
               Play locally on this device

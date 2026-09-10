@@ -9,7 +9,7 @@ const client = new Anthropic();
 
 // ── Per-game system prompts ───────────────────────────────────────────────────
 
-const SYSTEM_PROMPTS: Record<GameId, string> = {
+const SYSTEM_PROMPTS: Partial<Record<GameId, string>> = {
   'truth-or-dare': `You generate Truth or Dare game content.
 Output ONLY a raw JSON object — no markdown, no code fences, no explanation, no extra text.
 The JSON must match this exact shape:
@@ -38,6 +38,8 @@ function buildUserPrompt(gameId: GameId, interests: string[], themeName: string)
       return `Generate a This or That theme called "${themeName}" based on: ${interestList}. Output raw JSON only.`;
     case 'ranking':
       return `Generate a Ranking theme called "${themeName}" based on: ${interestList}. Output raw JSON only.`;
+    default:
+      throw new Error(`AI generation not supported for gameId: ${gameId}`);
   }
 }
 
@@ -110,7 +112,7 @@ function validateRanking(raw: unknown): ValidateResult {
   return { ok: true, content: { items: c.items as string[] } satisfies RankingContent };
 }
 
-const VALIDATORS: Record<GameId, (raw: unknown) => ValidateResult> = {
+const VALIDATORS: Partial<Record<GameId, (raw: unknown) => ValidateResult>> = {
   'truth-or-dare': validateTruthOrDare,
   'this-or-that': validateThisOrThat,
   ranking: validateRanking,
@@ -170,7 +172,12 @@ router.post('/', verifyToken, async (req, res) => {
   }
 
   // Validate against game-specific schema
-  const result = VALIDATORS[gameId](parsed);
+  const validator = VALIDATORS[gameId];
+  if (!validator) {
+    res.status(400).json({ error: `AI generation not supported for gameId: ${gameId}` });
+    return;
+  }
+  const result = validator(parsed);
   if (!result.ok) {
     res.status(500).json({
       error: 'LLM output failed schema validation',

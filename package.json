@@ -13,7 +13,8 @@
     "build:fe": "npm run build:shared && npm -w @games/frontend run build",
     "build:be": "npm run build:shared && npm -w @games/backend run build",
     "migrate": "ts-node --project packages/backend/tsconfig.json -r tsconfig-paths/register scripts/migrate.ts",
-    "seed:themes": "ts-node --project packages/backend/tsconfig.json -r tsconfig-paths/register scripts/seedThemes.ts"
+    "seed:themes": "ts-node --project packages/backend/tsconfig.json -r tsconfig-paths/register scripts/seedThemes.ts",
+    "seed:new-games": "ts-node --project packages/backend/tsconfig.json -r tsconfig-paths/register scripts/seedNewGames.ts"
   },
   "devDependencies": {
     "concurrently": "^9.1.0",

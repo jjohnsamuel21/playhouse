@@ -3,6 +3,9 @@ import type { GameMeta, ThemeContent } from '@games/shared';
 import { truthOrDarePlugin } from './plugins/truthOrDarePlugin';
 import { thisOrThatPlugin } from './plugins/thisOrThatPlugin';
 import { rankingPlugin } from './plugins/rankingPlugin';
+import { triviaPlugin } from './plugins/triviaPlugin';
+import { mostLikelyToPlugin } from './plugins/mostLikelyToPlugin';
+import { storyBuilderPlugin } from './plugins/storyBuilderPlugin';
 
 export interface RouteDefinition {
   path: string;
@@ -18,7 +21,7 @@ export interface FrontendGamePlugin {
 
 const registry = new Map<string, FrontendGamePlugin>();
 
-[truthOrDarePlugin, thisOrThatPlugin, rankingPlugin].forEach((p) => {
+[truthOrDarePlugin, thisOrThatPlugin, rankingPlugin, triviaPlugin, mostLikelyToPlugin, storyBuilderPlugin].forEach((p) => {
   registry.set(p.meta.id, p);
 });
 

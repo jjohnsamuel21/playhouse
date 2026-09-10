@@ -1,6 +1,6 @@
 import type { Timestamp } from 'firebase/firestore';
 
-export type GameId = 'ranking' | 'this-or-that' | 'truth-or-dare';
+export type GameId = 'ranking' | 'this-or-that' | 'truth-or-dare' | 'trivia' | 'most-likely-to' | 'story-builder';
 export type Visibility = 'public' | 'private';
 export type SessionStatus = 'waiting' | 'active' | 'finished';
 
@@ -19,7 +19,25 @@ export interface RankingContent {
   items: string[];
 }
 
-export type ThemeContent = TruthOrDareContent | ThisOrThatContent | RankingContent;
+export interface TriviaContent {
+  questions: { question: string; options: string[]; correctIndex: number }[];
+}
+
+export interface MostLikelyToContent {
+  prompts: string[];
+}
+
+export interface StoryBuilderContent {
+  starter: string;
+}
+
+export type ThemeContent =
+  | TruthOrDareContent
+  | ThisOrThatContent
+  | RankingContent
+  | TriviaContent
+  | MostLikelyToContent
+  | StoryBuilderContent;
 
 // ── Firestore documents ───────────────────────────────────────────────────────
 
@@ -103,6 +121,7 @@ export interface GameMeta {
   minPlayers: number;
   maxPlayers: number;
   supportsLLMGeneration: boolean;
+  supportsMultiplayer: boolean;
   themeColor: GameThemeColor;
 }
 

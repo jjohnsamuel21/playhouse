@@ -3,6 +3,7 @@ name: Deploy frontend to Firebase Hosting
 on:
   push:
     branches: [master]
+  workflow_dispatch:
 
 jobs:
   deploy:

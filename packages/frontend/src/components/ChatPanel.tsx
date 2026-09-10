@@ -43,7 +43,8 @@ export default function ChatPanel({ sessionId }: Props) {
       {/* Toggle button */}
       <button
         onClick={() => setOpen((o) => !o)}
-        className="fixed bottom-6 right-6 w-12 h-12 bg-indigo-600 hover:bg-indigo-500 rounded-full flex items-center justify-center shadow-lg z-40 transition-colors"
+        className="fixed bottom-6 right-6 w-12 h-12 rounded-full flex items-center justify-center shadow-lg z-40 text-white transition-opacity hover:opacity-90"
+        style={{ background: 'linear-gradient(135deg,#e0479e,#a855f7)' }}
       >
         <span className="text-xl">💬</span>
         {unread > 0 && (
@@ -55,17 +56,17 @@ export default function ChatPanel({ sessionId }: Props) {
 
       {/* Chat panel */}
       {open && (
-        <div className="fixed bottom-20 right-4 w-80 max-h-[70vh] bg-gray-900 border border-gray-700 rounded-2xl shadow-2xl z-40 flex flex-col">
+        <div className="fixed bottom-20 right-4 w-80 max-h-[70vh] bg-playhouse-surface border border-white/10 rounded-2xl shadow-2xl z-40 flex flex-col">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-800">
-            <span className="font-semibold text-sm">Game Chat</span>
-            <button onClick={() => setOpen(false)} className="text-gray-500 hover:text-white text-lg leading-none">×</button>
+          <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
+            <span className="font-display font-semibold text-sm text-playhouse-text-primary">Game Chat</span>
+            <button onClick={() => setOpen(false)} className="text-playhouse-text-tertiary hover:text-playhouse-text-primary text-lg leading-none">×</button>
           </div>
 
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-3 space-y-2 min-h-0">
             {messages.length === 0 && (
-              <p className="text-gray-600 text-xs text-center py-4">No messages yet</p>
+              <p className="text-playhouse-text-tertiary text-xs text-center py-4">No messages yet</p>
             )}
             {messages.map((msg, i) => (
               <div key={i} className="flex gap-2 items-start">
@@ -73,11 +74,11 @@ export default function ChatPanel({ sessionId }: Props) {
                   <img src={msg.photoURL} alt="" className="w-6 h-6 rounded-full shrink-0 mt-0.5" />
                 )}
                 <div className="min-w-0">
-                  <span className="text-xs text-gray-400">{msg.displayName} </span>
+                  <span className="text-xs text-playhouse-text-secondary">{msg.displayName} </span>
                   {msg.type === 'emote' ? (
                     <span className="text-2xl">{msg.message}</span>
                   ) : (
-                    <p className="text-sm text-gray-100 break-words">{msg.message}</p>
+                    <p className="text-sm text-playhouse-text-primary break-words">{msg.message}</p>
                   )}
                 </div>
               </div>
@@ -86,7 +87,7 @@ export default function ChatPanel({ sessionId }: Props) {
           </div>
 
           {/* Emotes */}
-          <div className="flex gap-1 px-3 py-2 border-t border-gray-800 overflow-x-auto">
+          <div className="flex gap-1 px-3 py-2 border-t border-white/[0.06] overflow-x-auto">
             {EMOTES.map((e) => (
               <button
                 key={e}
@@ -105,13 +106,14 @@ export default function ChatPanel({ sessionId }: Props) {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && send(input)}
               placeholder="Say something…"
-              className="flex-1 bg-gray-800 rounded-lg px-3 py-2 text-sm text-white placeholder:text-gray-600 outline-none"
+              className="flex-1 bg-playhouse-bg rounded-lg px-3 py-2 text-sm text-playhouse-text-primary placeholder:text-playhouse-text-tertiary outline-none"
               maxLength={500}
             />
             <button
               onClick={() => send(input)}
               disabled={!input.trim()}
-              className="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 rounded-lg text-sm font-medium transition-colors"
+              className="px-3 py-2 rounded-lg text-sm font-medium text-white disabled:opacity-40 transition-opacity hover:opacity-90"
+              style={{ background: 'linear-gradient(135deg,#e0479e,#a855f7)' }}
             >
               →
             </button>

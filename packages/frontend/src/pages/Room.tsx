@@ -121,37 +121,37 @@ export default function Room() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center p-6">
+    <div className="page-layer min-h-screen flex items-center justify-center p-6">
       {leftNotice && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 bg-gray-800 text-gray-200 px-4 py-2 rounded-xl text-sm shadow-lg z-50">
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 bg-playhouse-surface border border-white/10 text-playhouse-text-primary px-4 py-2 rounded-xl text-sm shadow-lg z-50">
           {leftNotice}
         </div>
       )}
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <p className="text-gray-400 text-sm mb-1">Room Code</p>
-          <h1 className="text-5xl font-bold tracking-widest font-mono">{code}</h1>
-          <p className="text-gray-500 text-sm mt-2">Share this code with friends</p>
+          <p className="text-playhouse-text-secondary text-sm mb-1">Room Code</p>
+          <h1 className="font-display text-5xl font-bold tracking-widest font-mono text-playhouse-text-primary">{code}</h1>
+          <p className="text-playhouse-text-tertiary text-sm mt-2">Share this code with friends</p>
         </div>
 
-        <div className="bg-gray-900 rounded-2xl p-6 mb-4">
-          <h2 className="text-sm text-gray-400 mb-3">
+        <div className="bg-playhouse-surface border border-white/[0.06] rounded-2xl p-6 mb-4">
+          <h2 className="text-sm text-playhouse-text-secondary mb-3">
             Players ({players.length}{minPlayers > 1 ? `/${minPlayers}+ needed` : ''})
           </h2>
           {players.length === 0 ? (
-            <p className="text-gray-600 text-sm">Waiting for players to join…</p>
+            <p className="text-playhouse-text-tertiary text-sm">Waiting for players to join…</p>
           ) : (
             <div className="space-y-3">
               {players.map((p) => (
                 <div key={p.uid} className="flex items-center gap-3">
                   {p.photoURL && <img src={p.photoURL} alt="" className="w-8 h-8 rounded-full" />}
-                  <span className="font-medium">{p.displayName}</span>
+                  <span className="font-medium text-playhouse-text-primary">{p.displayName}</span>
                   <span className="ml-auto text-xs">
                     {p.uid === hostId
-                      ? <span className="text-yellow-400">host</span>
+                      ? <span className="text-amber-400">host</span>
                       : readyUids.has(p.uid)
-                        ? <span className="text-green-400">ready ✓</span>
-                        : <span className="text-gray-500">not ready</span>
+                        ? <span className="text-emerald-400">ready ✓</span>
+                        : <span className="text-playhouse-text-tertiary">not ready</span>
                     }
                   </span>
                 </div>
@@ -164,7 +164,8 @@ export default function Room() {
           {!isHost && !isReady && (
             <button
               onClick={handleReady}
-              className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-semibold transition-colors"
+              className="w-full py-3 rounded-xl font-bold text-white transition-opacity hover:opacity-90"
+              style={{ background: 'linear-gradient(135deg,#e0479e,#a855f7)' }}
             >
               Ready
             </button>
@@ -173,7 +174,8 @@ export default function Room() {
             <button
               onClick={handleStart}
               disabled={!canStart}
-              className="w-full py-3 bg-green-600 hover:bg-green-500 disabled:opacity-40 disabled:cursor-not-allowed rounded-xl font-semibold transition-colors"
+              className="w-full py-3 rounded-xl font-bold text-white disabled:opacity-40 disabled:cursor-not-allowed transition-opacity hover:opacity-90"
+              style={{ background: 'linear-gradient(135deg,#22c55e,#16a34a)' }}
             >
               {players.length < minPlayers
                 ? `Need ${minPlayers - players.length} more player(s)`
@@ -184,7 +186,7 @@ export default function Room() {
           )}
           <button
             onClick={() => navigate('/')}
-            className="w-full py-3 text-gray-400 hover:text-white transition-colors"
+            className="w-full py-3 text-playhouse-text-secondary hover:text-playhouse-text-primary transition-colors"
           >
             Leave Room
           </button>

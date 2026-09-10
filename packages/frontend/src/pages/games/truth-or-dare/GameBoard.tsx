@@ -165,7 +165,7 @@ export default function TodGameBoard() {
   if (gameEndedBy) return <GameEndedScreen endedBy={gameEndedBy} />;
 
   return (
-    <div className="min-h-screen bg-gray-950 flex flex-col items-center p-6">
+    <div className="page-layer min-h-screen flex flex-col items-center p-6">
       <div className="w-full max-w-md mt-8 space-y-6">
 
         <MultiplayerBanners
@@ -177,11 +177,11 @@ export default function TodGameBoard() {
 
         {/* Last player standing */}
         {isLastPlayer && (
-          <div className="bg-yellow-900/40 border border-yellow-500/30 rounded-xl px-4 py-3 text-center">
-            <p className="text-yellow-300 text-sm font-medium">You're the only player left</p>
+          <div className="bg-[rgba(251,191,36,0.1)] border border-[rgba(251,191,36,0.3)] rounded-xl px-4 py-3 text-center">
+            <p className="text-amber-300 text-sm font-medium">You're the only player left</p>
             <button
               onClick={handleEndGame}
-              className="mt-2 px-4 py-2 bg-yellow-600 hover:bg-yellow-500 rounded-lg text-sm font-semibold transition-colors"
+              className="mt-2 px-4 py-2 bg-amber-600 hover:bg-amber-500 rounded-lg text-sm font-semibold text-white transition-colors"
             >
               End Game
             </button>
@@ -190,25 +190,27 @@ export default function TodGameBoard() {
 
         {/* Current player */}
         <div className="text-center">
-          <p className="text-gray-400 text-sm">Current player</p>
-          <h2 className="text-2xl font-bold mt-1">{isMultiplayer ? mpCurrentName : currentPlayer}</h2>
+          <p className="text-playhouse-text-secondary text-sm">Current player</p>
+          <h2 className="font-display font-bold text-2xl text-playhouse-text-primary mt-1">
+            {isMultiplayer ? mpCurrentName : currentPlayer}
+          </h2>
           {isMultiplayer && !isMpCurrentPlayer && !currentQuestion && !isLastPlayer && (
-            <p className="text-gray-500 text-sm mt-1">Waiting for {mpCurrentName} to choose…</p>
+            <p className="text-playhouse-text-tertiary text-sm mt-1">Waiting for {mpCurrentName} to choose…</p>
           )}
         </div>
 
         {/* Question card */}
         {currentQuestion ? (
-          <div className={`rounded-2xl p-6 text-center ${currentType === 'truth' ? 'bg-blue-900/40 border border-blue-500/30' : 'bg-red-900/40 border border-red-500/30'}`}>
-            <span className="text-xs font-semibold uppercase tracking-widest text-gray-400">{currentType}</span>
-            <p className="text-xl font-medium mt-3 leading-relaxed">{currentQuestion}</p>
+          <div className={`rounded-2xl p-6 text-center border ${currentType === 'truth' ? 'bg-[rgba(34,211,238,0.08)] border-[rgba(34,211,238,0.25)]' : 'bg-[rgba(224,71,158,0.08)] border-[rgba(224,71,158,0.25)]'}`}>
+            <span className="text-xs font-semibold uppercase tracking-widest text-playhouse-text-secondary">{currentType}</span>
+            <p className="text-xl font-medium mt-3 leading-relaxed text-playhouse-text-primary">{currentQuestion}</p>
             {isMultiplayer && currentType === 'truth' && (
-              <p className="text-xs text-gray-500 mt-3">Answer in chat below 💬</p>
+              <p className="text-xs text-playhouse-text-tertiary mt-3">Answer in chat below 💬</p>
             )}
           </div>
         ) : (
           !isLastPlayer && (
-            <div className="bg-gray-900 rounded-2xl p-6 text-center text-gray-500">
+            <div className="bg-playhouse-surface border border-white/[0.06] rounded-2xl p-6 text-center text-playhouse-text-tertiary">
               Pick truth or dare
             </div>
           )
@@ -219,13 +221,28 @@ export default function TodGameBoard() {
           !currentQuestion ? (
             (!isMultiplayer || isMpCurrentPlayer) && (
               <div className="grid grid-cols-2 gap-3">
-                <button onClick={() => handleChoose('truth')} className="py-4 bg-blue-700 hover:bg-blue-600 rounded-xl font-bold text-lg transition-colors">Truth</button>
-                <button onClick={() => handleChoose('dare')} className="py-4 bg-red-700 hover:bg-red-600 rounded-xl font-bold text-lg transition-colors">Dare</button>
+                <button
+                  onClick={() => handleChoose('truth')}
+                  className="py-4 rounded-xl font-bold text-lg text-white transition-opacity hover:opacity-90"
+                  style={{ background: 'linear-gradient(135deg,#22d3ee,#6366f1)' }}
+                >
+                  Truth
+                </button>
+                <button
+                  onClick={() => handleChoose('dare')}
+                  className="py-4 rounded-xl font-bold text-lg text-white transition-opacity hover:opacity-90"
+                  style={{ background: 'linear-gradient(135deg,#e0479e,#a855f7)' }}
+                >
+                  Dare
+                </button>
               </div>
             )
           ) : (
             (!isMultiplayer || isMpCurrentPlayer) && (
-              <button onClick={nextTurn} className="w-full py-3 bg-gray-700 hover:bg-gray-600 rounded-xl font-semibold transition-colors">
+              <button
+                onClick={nextTurn}
+                className="w-full py-3 rounded-xl font-semibold border border-white/10 text-playhouse-text-primary hover:bg-white/[0.04] transition-colors"
+              >
                 Next Player →
               </button>
             )
@@ -234,21 +251,21 @@ export default function TodGameBoard() {
 
         {/* End game — host only in multiplayer, always available in solo */}
         {!isLastPlayer && (!isMultiplayer || isHost) && (
-          <button onClick={handleEndGame} className="w-full text-gray-500 hover:text-gray-300 text-sm transition-colors">
+          <button onClick={handleEndGame} className="w-full text-playhouse-text-tertiary hover:text-playhouse-text-secondary text-sm transition-colors">
             End Game
           </button>
         )}
 
         {/* Round history */}
         {history.length > 0 && (
-          <div className="border-t border-gray-800 pt-4">
-            <p className="text-xs text-gray-500 mb-2 uppercase tracking-wide">History</p>
+          <div className="border-t border-white/[0.06] pt-4">
+            <p className="text-xs text-playhouse-text-tertiary mb-2 uppercase tracking-wide">History</p>
             <div className="space-y-2 max-h-48 overflow-y-auto">
               {[...history].reverse().map((item, i) => (
-                <div key={i} className="text-sm text-gray-400">
-                  <span className="font-medium text-gray-300">{item.player}</span>
+                <div key={i} className="text-sm text-playhouse-text-secondary">
+                  <span className="font-medium text-playhouse-text-primary">{item.player}</span>
                   {' · '}
-                  <span className={item.type === 'truth' ? 'text-blue-400' : 'text-red-400'}>{item.type}</span>
+                  <span className={item.type === 'truth' ? 'text-cyan-400' : 'text-playhouse-accent-primary'}>{item.type}</span>
                   {' · '}
                   {item.question}
                 </div>
@@ -267,7 +284,7 @@ export default function TodGameBoard() {
 
 function LoadingScreen() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-950">
+    <div className="page-layer min-h-screen flex items-center justify-center">
       <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin" />
     </div>
   );

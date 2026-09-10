@@ -3,7 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../../firebase';
 import { useAuth } from '../../../contexts/AuthContext';
+import { GAME_VISUALS } from '../../../registry/gameVisuals';
 import type { ThemeDoc } from '@games/shared';
+
+const visual = GAME_VISUALS['ranking'];
 
 export default function RankThemeSelect() {
   const navigate = useNavigate();
@@ -27,41 +30,60 @@ export default function RankThemeSelect() {
   }, [user]);
 
   return (
-    <div className="min-h-screen bg-gray-950 p-6">
+    <div className="page-layer min-h-screen p-6 animate-fadeUp">
       <div className="max-w-lg mx-auto">
-        <button onClick={() => navigate('/')} className="text-gray-400 hover:text-white mb-6 flex items-center gap-2">← Back</button>
-        <div className="flex items-start justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold mb-1">🏆 Ranking Game</h1>
-            <p className="text-gray-400">Pick a theme to rank</p>
+        <span
+          onClick={() => navigate('/')}
+          className="text-sm text-playhouse-text-secondary hover:text-playhouse-text-primary cursor-pointer transition-colors"
+        >
+          ← Back
+        </span>
+        <div className="flex items-start justify-between mt-4 mb-6">
+          <div className="flex items-center gap-3">
+            <div
+              className="w-11 h-11 rounded-xl flex items-center justify-center font-display font-bold text-lg shrink-0"
+              style={{ background: visual.gradient }}
+            >
+              {visual.glyph}
+            </div>
+            <div>
+              <h1 className="font-display font-bold text-2xl text-playhouse-text-primary m-0">Ranking Game</h1>
+              <p className="text-playhouse-text-secondary text-[13.5px] mt-0.5 m-0">Pick a theme to rank</p>
+            </div>
           </div>
           <button
             onClick={() => navigate('/generate?gameId=ranking')}
-            className="flex items-center gap-1.5 px-3 py-2 bg-indigo-700/40 hover:bg-indigo-700/60 border border-indigo-500/30 rounded-xl text-sm text-indigo-300 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-2 bg-[rgba(224,71,158,0.1)] hover:bg-[rgba(224,71,158,0.18)] border border-[rgba(224,71,158,0.3)] rounded-xl text-sm text-playhouse-accent-primary transition-colors shrink-0"
           >
             ✨ Generate with AI
           </button>
         </div>
         {loading ? (
-          <div className="text-gray-500">Loading...</div>
+          <div className="text-playhouse-text-tertiary">Loading...</div>
         ) : (
           <div className="space-y-3">
             {themes.map((theme) => (
               <button
                 key={theme.id}
                 onClick={() => navigate(`/game/ranking/local-setup/${theme.id}`)}
-                className="w-full bg-gray-900 hover:bg-gray-800 rounded-xl p-4 text-left transition-colors"
+                className="w-full bg-playhouse-surface border border-white/[0.06] hover:border-[rgba(224,71,158,0.35)] rounded-xl p-4 text-left transition-colors"
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-semibold">{theme.name}</p>
-                    {theme.description && <p className="text-sm text-gray-400 mt-0.5">{theme.description}</p>}
+                    <p className="font-semibold text-playhouse-text-primary">{theme.name}</p>
+                    {theme.description && (
+                      <p className="text-sm text-playhouse-text-secondary mt-0.5">{theme.description}</p>
+                    )}
                   </div>
                   <div className="flex flex-col items-end gap-1">
                     {theme.ownerId === user?.uid && theme.visibility === 'private' && (
-                      <span className="text-xs bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full">private</span>
+                      <span className="text-xs bg-white/[0.06] text-playhouse-text-tertiary px-2 py-0.5 rounded-full">
+                        private
+                      </span>
                     )}
-                    {theme.isLLMGenerated && <span className="text-xs text-indigo-400">✨ AI</span>}
+                    {theme.isLLMGenerated && (
+                      <span className="text-xs text-playhouse-accent-primary">✨ AI</span>
+                    )}
                   </div>
                 </div>
               </button>

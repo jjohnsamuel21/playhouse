@@ -83,18 +83,19 @@ export default function GenerateTheme() {
 
   function playNow() {
     if (!generatedThemeId) return;
-    if (gameId === 'truth-or-dare') navigate(`/game/truth-or-dare/toss/${generatedThemeId}`);
-    else navigate(`/game/${gameId}/play/${generatedThemeId}`);
+    navigate(`/game/${gameId}/local-setup/${generatedThemeId}`);
   }
 
   // ── Generating screen ───────────────────────────────────────────────────────
   if (step === 'generating') {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center p-6">
+      <div className="page-layer min-h-screen flex items-center justify-center p-6">
         <div className="text-center space-y-4">
           <div className="text-5xl animate-spin inline-block">✨</div>
-          <p className="text-lg font-medium">Claude is generating your theme…</p>
-          <p className="text-gray-400 text-sm">This takes 15–30 seconds</p>
+          <p className="text-lg font-display font-semibold text-playhouse-text-primary">
+            Claude is generating your theme…
+          </p>
+          <p className="text-playhouse-text-secondary text-sm">This takes 15–30 seconds</p>
         </div>
       </div>
     );
@@ -103,16 +104,23 @@ export default function GenerateTheme() {
   // ── Preview screen ──────────────────────────────────────────────────────────
   if (step === 'preview' && generatedContent) {
     return (
-      <div className="min-h-screen bg-gray-950 p-6">
+      <div className="page-layer min-h-screen p-6 animate-fadeUp">
         <div className="max-w-lg mx-auto space-y-6">
           <div>
-            <button onClick={() => navigate(-1)} className="text-gray-400 hover:text-white mb-4 flex items-center gap-2">← Back</button>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-indigo-400 text-sm">✨ AI Generated</span>
-              <span className="text-xs bg-gray-800 text-gray-400 px-2 py-0.5 rounded-full">{visibility}</span>
+            <span
+              onClick={() => navigate(-1)}
+              className="text-sm text-playhouse-text-secondary hover:text-playhouse-text-primary cursor-pointer transition-colors"
+            >
+              ← Back
+            </span>
+            <div className="flex items-center gap-2 mt-4 mb-1">
+              <span className="text-playhouse-accent-primary text-sm font-semibold">✨ AI Generated</span>
+              <span className="text-xs bg-white/[0.06] text-playhouse-text-tertiary px-2 py-0.5 rounded-full">
+                {visibility}
+              </span>
             </div>
-            <h1 className="text-2xl font-bold">{themeName}</h1>
-            <p className="text-gray-400 text-sm mt-1">Based on: {interests.join(', ')}</p>
+            <h1 className="font-display font-bold text-2xl text-playhouse-text-primary">{themeName}</h1>
+            <p className="text-playhouse-text-secondary text-sm mt-1">Based on: {interests.join(', ')}</p>
           </div>
 
           <ContentPreview gameId={gameId} content={generatedContent} />
@@ -120,13 +128,14 @@ export default function GenerateTheme() {
           <div className="flex gap-3">
             <button
               onClick={playNow}
-              className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-semibold transition-colors"
+              className="flex-1 py-3 rounded-xl font-bold text-white transition-opacity hover:opacity-90"
+              style={{ background: 'linear-gradient(135deg,#e0479e,#a855f7)' }}
             >
               Play Now
             </button>
             <button
               onClick={() => navigate(`/game/${gameId}/themes`)}
-              className="flex-1 py-3 bg-gray-800 hover:bg-gray-700 rounded-xl font-semibold transition-colors"
+              className="flex-1 py-3 rounded-xl font-semibold border border-white/10 text-playhouse-text-primary hover:bg-white/[0.04] transition-colors"
             >
               Back to Themes
             </button>
@@ -134,7 +143,7 @@ export default function GenerateTheme() {
 
           <button
             onClick={() => { setStep('form'); setGeneratedThemeId(null); setGeneratedContent(null); }}
-            className="w-full text-gray-500 hover:text-gray-300 text-sm transition-colors"
+            className="w-full text-playhouse-text-tertiary hover:text-playhouse-text-secondary text-sm transition-colors"
           >
             Generate Another
           </button>
@@ -145,12 +154,21 @@ export default function GenerateTheme() {
 
   // ── Form screen ─────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-gray-950 p-6">
+    <div className="page-layer min-h-screen p-6 animate-fadeUp">
       <div className="max-w-lg mx-auto space-y-8">
         <div>
-          <button onClick={() => navigate(-1)} className="text-gray-400 hover:text-white mb-4 flex items-center gap-2">← Back</button>
-          <h1 className="text-2xl font-bold">✨ Generate with AI</h1>
-          <p className="text-gray-400 text-sm mt-1">Claude creates a custom theme based on your interests</p>
+          <span
+            onClick={() => navigate(-1)}
+            className="text-sm text-playhouse-text-secondary hover:text-playhouse-text-primary cursor-pointer transition-colors"
+          >
+            ← Back
+          </span>
+          <h1 className="font-display font-bold text-2xl text-playhouse-text-primary mt-4">
+            ✨ Generate with AI
+          </h1>
+          <p className="text-playhouse-text-secondary text-sm mt-1">
+            Claude creates a custom theme based on your interests
+          </p>
         </div>
 
         {error && (
@@ -161,7 +179,7 @@ export default function GenerateTheme() {
 
         {/* Game selector */}
         <div className="space-y-2">
-          <label className="text-sm text-gray-400 uppercase tracking-wide">Game</label>
+          <label className="text-[13px] text-playhouse-text-secondary uppercase tracking-wide">Game</label>
           <div className="grid grid-cols-3 gap-2">
             {GAMES.map((g) => (
               <button
@@ -169,9 +187,10 @@ export default function GenerateTheme() {
                 onClick={() => setGameId(g.id)}
                 className={`py-3 rounded-xl text-sm font-medium transition-colors ${
                   gameId === g.id
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-gray-900 text-gray-400 hover:bg-gray-800'
+                    ? 'text-white'
+                    : 'bg-playhouse-surface text-playhouse-text-secondary hover:bg-white/[0.04]'
                 }`}
+                style={gameId === g.id ? { background: 'linear-gradient(135deg,#e0479e,#a855f7)' } : undefined}
               >
                 <span className="block text-xl mb-1">{g.emoji}</span>
                 {g.label}
@@ -182,24 +201,29 @@ export default function GenerateTheme() {
 
         {/* Theme name */}
         <div className="space-y-2">
-          <label className="text-sm text-gray-400 uppercase tracking-wide">Theme Name</label>
+          <label className="text-[13px] text-playhouse-text-secondary uppercase tracking-wide">Theme Name</label>
           <input
             type="text"
             value={themeName}
             onChange={(e) => setThemeName(e.target.value)}
             placeholder="e.g. Office Party, Movie Night, Road Trip…"
-            className="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 transition-colors"
+            className="w-full bg-playhouse-surface border border-white/10 rounded-xl px-4 py-3 text-playhouse-text-primary placeholder:text-playhouse-text-tertiary focus:outline-none focus:border-playhouse-accent-primary transition-colors"
           />
         </div>
 
         {/* Interests tags */}
         <div className="space-y-2">
-          <label className="text-sm text-gray-400 uppercase tracking-wide">Interests / Topics</label>
-          <div className="bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 focus-within:border-indigo-500 transition-colors min-h-[52px] flex flex-wrap gap-2 items-center">
+          <label className="text-[13px] text-playhouse-text-secondary uppercase tracking-wide">
+            Interests / Topics
+          </label>
+          <div className="bg-playhouse-surface border border-white/10 rounded-xl px-3 py-2 focus-within:border-playhouse-accent-primary transition-colors min-h-[52px] flex flex-wrap gap-2 items-center">
             {interests.map((tag) => (
-              <span key={tag} className="flex items-center gap-1 bg-indigo-700/50 text-indigo-200 text-sm px-2 py-1 rounded-lg">
+              <span
+                key={tag}
+                className="flex items-center gap-1 bg-[rgba(224,71,158,0.14)] text-playhouse-text-primary text-sm px-2 py-1 rounded-lg"
+              >
                 {tag}
-                <button onClick={() => removeTag(tag)} className="text-indigo-400 hover:text-white">×</button>
+                <button onClick={() => removeTag(tag)} className="text-playhouse-accent-primary hover:text-white">×</button>
               </span>
             ))}
             <input
@@ -209,15 +233,15 @@ export default function GenerateTheme() {
               onKeyDown={handleTagKeyDown}
               onBlur={addTag}
               placeholder={interests.length === 0 ? 'Type an interest, press Enter…' : ''}
-              className="flex-1 min-w-[120px] bg-transparent text-white placeholder-gray-500 focus:outline-none text-sm py-1"
+              className="flex-1 min-w-[120px] bg-transparent text-playhouse-text-primary placeholder:text-playhouse-text-tertiary focus:outline-none text-sm py-1"
             />
           </div>
-          <p className="text-xs text-gray-600">Press Enter or comma to add each interest</p>
+          <p className="text-xs text-playhouse-text-tertiary">Press Enter or comma to add each interest</p>
         </div>
 
         {/* Visibility */}
         <div className="space-y-2">
-          <label className="text-sm text-gray-400 uppercase tracking-wide">Visibility</label>
+          <label className="text-[13px] text-playhouse-text-secondary uppercase tracking-wide">Visibility</label>
           <div className="grid grid-cols-2 gap-2">
             {(['private', 'public'] as const).map((v) => (
               <button
@@ -225,15 +249,16 @@ export default function GenerateTheme() {
                 onClick={() => setVisibility(v)}
                 className={`py-3 rounded-xl text-sm font-medium transition-colors ${
                   visibility === v
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-gray-900 text-gray-400 hover:bg-gray-800'
+                    ? 'text-white'
+                    : 'bg-playhouse-surface text-playhouse-text-secondary hover:bg-white/[0.04]'
                 }`}
+                style={visibility === v ? { background: 'linear-gradient(135deg,#e0479e,#a855f7)' } : undefined}
               >
                 {v === 'private' ? '🔒 Private' : '🌐 Public'}
               </button>
             ))}
           </div>
-          <p className="text-xs text-gray-600">
+          <p className="text-xs text-playhouse-text-tertiary">
             {visibility === 'private' ? 'Only you can see and use this theme' : 'Visible to all players'}
           </p>
         </div>
@@ -241,7 +266,8 @@ export default function GenerateTheme() {
         <button
           onClick={handleGenerate}
           disabled={!themeName.trim() || interests.length === 0}
-          className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed rounded-xl font-semibold text-lg transition-colors"
+          className="w-full py-4 rounded-xl font-bold text-lg text-white disabled:opacity-40 disabled:cursor-not-allowed transition-opacity hover:opacity-90"
+          style={{ background: 'linear-gradient(135deg,#e0479e,#a855f7)' }}
         >
           Generate Theme ✨
         </button>
@@ -257,10 +283,12 @@ function ContentPreview({ gameId, content }: { gameId: GameId; content: unknown 
     const c = content as TruthOrDareContent;
     return (
       <div className="space-y-4">
-        <Section title="Truths" items={c.truth.slice(0, 5)} color="blue" />
-        <Section title="Dares" items={c.dare.slice(0, 5)} color="red" />
+        <Section title="Truths" items={c.truth.slice(0, 5)} color="cyan" />
+        <Section title="Dares" items={c.dare.slice(0, 5)} color="pink" />
         {(c.truth.length + c.dare.length) > 10 && (
-          <p className="text-xs text-gray-500 text-center">+{c.truth.length - 5} more truths, {c.dare.length - 5} more dares</p>
+          <p className="text-xs text-playhouse-text-tertiary text-center">
+            +{c.truth.length - 5} more truths, {c.dare.length - 5} more dares
+          </p>
         )}
       </div>
     );
@@ -272,12 +300,14 @@ function ContentPreview({ gameId, content }: { gameId: GameId; content: unknown 
       <div className="space-y-2">
         {c.pairs.slice(0, 6).map((p, i) => (
           <div key={i} className="flex gap-2">
-            <div className="flex-1 bg-gray-900 rounded-lg px-3 py-2 text-sm">{p.a}</div>
-            <span className="text-gray-500 self-center text-xs">vs</span>
-            <div className="flex-1 bg-gray-900 rounded-lg px-3 py-2 text-sm">{p.b}</div>
+            <div className="flex-1 bg-playhouse-surface rounded-lg px-3 py-2 text-sm text-playhouse-text-primary">{p.a}</div>
+            <span className="text-playhouse-text-tertiary self-center text-xs">vs</span>
+            <div className="flex-1 bg-playhouse-surface rounded-lg px-3 py-2 text-sm text-playhouse-text-primary">{p.b}</div>
           </div>
         ))}
-        {c.pairs.length > 6 && <p className="text-xs text-gray-500 text-center">+{c.pairs.length - 6} more pairs</p>}
+        {c.pairs.length > 6 && (
+          <p className="text-xs text-playhouse-text-tertiary text-center">+{c.pairs.length - 6} more pairs</p>
+        )}
       </div>
     );
   }
@@ -287,12 +317,14 @@ function ContentPreview({ gameId, content }: { gameId: GameId; content: unknown 
     return (
       <div className="space-y-2">
         {c.items.slice(0, 8).map((item, i) => (
-          <div key={i} className="bg-gray-900 rounded-lg px-3 py-2 text-sm flex items-center gap-3">
-            <span className="text-gray-500 w-4 text-right">{i + 1}.</span>
+          <div key={i} className="bg-playhouse-surface rounded-lg px-3 py-2 text-sm text-playhouse-text-primary flex items-center gap-3">
+            <span className="text-playhouse-text-tertiary w-4 text-right">{i + 1}.</span>
             {item}
           </div>
         ))}
-        {c.items.length > 8 && <p className="text-xs text-gray-500 text-center">+{c.items.length - 8} more items</p>}
+        {c.items.length > 8 && (
+          <p className="text-xs text-playhouse-text-tertiary text-center">+{c.items.length - 8} more items</p>
+        )}
       </div>
     );
   }
@@ -300,15 +332,17 @@ function ContentPreview({ gameId, content }: { gameId: GameId; content: unknown 
   return null;
 }
 
-function Section({ title, items, color }: { title: string; items: string[]; color: 'blue' | 'red' }) {
-  const cls = color === 'blue'
-    ? 'bg-blue-900/30 border-blue-500/20'
-    : 'bg-red-900/30 border-red-500/20';
+function Section({ title, items, color }: { title: string; items: string[]; color: 'cyan' | 'pink' }) {
+  const cls = color === 'cyan'
+    ? 'bg-[rgba(34,211,238,0.08)] border-[rgba(34,211,238,0.2)]'
+    : 'bg-[rgba(224,71,158,0.08)] border-[rgba(224,71,158,0.2)]';
   return (
     <div className={`rounded-xl p-4 border ${cls}`}>
-      <p className="text-xs uppercase tracking-wide text-gray-400 mb-2">{title}</p>
+      <p className="text-xs uppercase tracking-wide text-playhouse-text-secondary mb-2">{title}</p>
       <ul className="space-y-1">
-        {items.map((item, i) => <li key={i} className="text-sm text-gray-300">• {item}</li>)}
+        {items.map((item, i) => (
+          <li key={i} className="text-sm text-playhouse-text-primary">• {item}</li>
+        ))}
       </ul>
     </div>
   );

@@ -109,28 +109,32 @@ export default function TotGameBoard() {
   }
 
   if (loading) return <LoadingScreen />;
-  if (!theme || pairs.length === 0) return <div className="p-6 text-gray-400">No pairs found.</div>;
+  if (!theme || pairs.length === 0) return <div className="p-6 text-playhouse-text-secondary">No pairs found.</div>;
   if (gameEndedBy) return <GameEndedScreen endedBy={gameEndedBy} />;
 
   if (done) {
     return (
-      <div className="min-h-screen bg-gray-950 p-6">
+      <div className="page-layer min-h-screen p-6">
         <div className="max-w-lg mx-auto">
-          <h1 className="text-2xl font-bold mb-6 text-center">Your Choices</h1>
+          <h1 className="font-display font-bold text-2xl mb-6 text-center text-playhouse-text-primary">Your Choices</h1>
           <div className="space-y-3 mb-8">
             {choices.map((c, i) => (
-              <div key={i} className="bg-gray-900 rounded-xl p-4">
+              <div key={i} className="bg-playhouse-surface border border-white/[0.06] rounded-xl p-4">
                 {players.length > 1 && (
-                  <p className="text-xs text-gray-500 mb-2">{c.player}</p>
+                  <p className="text-xs text-playhouse-text-tertiary mb-2">{c.player}</p>
                 )}
                 <div className="flex gap-3">
-                  <div className={`flex-1 p-3 rounded-lg text-sm ${c.selected === c.pair.a ? 'bg-indigo-600' : 'bg-gray-800 text-gray-500'}`}>{c.pair.a}</div>
-                  <div className={`flex-1 p-3 rounded-lg text-sm ${c.selected === c.pair.b ? 'bg-indigo-600' : 'bg-gray-800 text-gray-500'}`}>{c.pair.b}</div>
+                  <div className={`flex-1 p-3 rounded-lg text-sm ${c.selected === c.pair.a ? 'text-white' : 'bg-white/[0.04] text-playhouse-text-tertiary'}`} style={c.selected === c.pair.a ? { background: 'linear-gradient(135deg,#e0479e,#a855f7)' } : undefined}>{c.pair.a}</div>
+                  <div className={`flex-1 p-3 rounded-lg text-sm ${c.selected === c.pair.b ? 'text-white' : 'bg-white/[0.04] text-playhouse-text-tertiary'}`} style={c.selected === c.pair.b ? { background: 'linear-gradient(135deg,#e0479e,#a855f7)' } : undefined}>{c.pair.b}</div>
                 </div>
               </div>
             ))}
           </div>
-          <button onClick={() => navigate('/')} className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-semibold transition-colors">
+          <button
+            onClick={() => navigate('/')}
+            className="w-full py-3 rounded-xl font-bold text-white transition-opacity hover:opacity-90"
+            style={{ background: 'linear-gradient(135deg,#e0479e,#a855f7)' }}
+          >
             Back to Home
           </button>
         </div>
@@ -141,7 +145,7 @@ export default function TotGameBoard() {
   const { a: optA, b: optB } = pairs[round];
 
   return (
-    <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center p-6">
+    <div className="page-layer min-h-screen flex flex-col items-center justify-center p-6">
       <div className="w-full max-w-sm space-y-6">
 
         <MultiplayerBanners
@@ -153,29 +157,38 @@ export default function TotGameBoard() {
 
         <div className="text-center">
           {!isMultiplayer && players.length > 1 && (
-            <p className="text-lg font-bold mb-1">{currentPlayer}'s turn</p>
+            <p className="font-display font-bold text-lg mb-1 text-playhouse-text-primary">{currentPlayer}'s turn</p>
           )}
-          <p className="text-gray-400 text-sm">{theme.name}</p>
-          <p className="text-gray-500 text-xs mt-1">{round + 1} / {pairs.length}</p>
+          <p className="text-playhouse-text-secondary text-sm">{theme.name}</p>
+          <p className="text-playhouse-text-tertiary text-xs mt-1">{round + 1} / {pairs.length}</p>
         </div>
 
-        <div className="w-full bg-gray-800 rounded-full h-1">
-          <div className="bg-indigo-500 h-1 rounded-full transition-all" style={{ width: `${((round + 1) / pairs.length) * 100}%` }} />
+        <div className="w-full bg-white/[0.06] rounded-full h-1">
+          <div
+            className="h-1 rounded-full transition-all"
+            style={{ width: `${((round + 1) / pairs.length) * 100}%`, background: 'linear-gradient(90deg,#e0479e,#a855f7)' }}
+          />
         </div>
 
-        <p className="text-center text-gray-300 font-medium text-lg">This or That?</p>
+        <p className="text-center text-playhouse-text-primary font-display font-medium text-lg">This or That?</p>
 
         <div className="space-y-4">
-          <button onClick={() => handleSelect(optA)} className="w-full py-6 px-4 bg-gray-900 hover:bg-indigo-900/50 border-2 border-transparent hover:border-indigo-500 rounded-2xl text-left font-medium transition-all">
+          <button
+            onClick={() => handleSelect(optA)}
+            className="w-full py-6 px-4 bg-playhouse-surface hover:bg-[rgba(224,71,158,0.08)] border-2 border-transparent hover:border-[rgba(224,71,158,0.35)] rounded-2xl text-left font-medium text-playhouse-text-primary transition-all"
+          >
             {optA}
           </button>
-          <button onClick={() => handleSelect(optB)} className="w-full py-6 px-4 bg-gray-900 hover:bg-indigo-900/50 border-2 border-transparent hover:border-indigo-500 rounded-2xl text-left font-medium transition-all">
+          <button
+            onClick={() => handleSelect(optB)}
+            className="w-full py-6 px-4 bg-playhouse-surface hover:bg-[rgba(224,71,158,0.08)] border-2 border-transparent hover:border-[rgba(224,71,158,0.35)] rounded-2xl text-left font-medium text-playhouse-text-primary transition-all"
+          >
             {optB}
           </button>
         </div>
 
         {isMultiplayer && isHost && (
-          <button onClick={endGame} className="w-full text-gray-500 hover:text-gray-300 text-sm transition-colors">
+          <button onClick={endGame} className="w-full text-playhouse-text-tertiary hover:text-playhouse-text-secondary text-sm transition-colors">
             End Game for Everyone
           </button>
         )}
@@ -188,7 +201,7 @@ export default function TotGameBoard() {
 
 function LoadingScreen() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-950">
+    <div className="page-layer min-h-screen flex items-center justify-center">
       <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin" />
     </div>
   );

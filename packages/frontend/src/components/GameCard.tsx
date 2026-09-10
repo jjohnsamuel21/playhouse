@@ -37,6 +37,17 @@ export default function GameCard({ plugin }: Props) {
         </span>
         <span className="text-xs font-semibold text-playhouse-accent-primary">Play →</span>
       </div>
+      {meta.supportsLLMGeneration && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/generate?gameId=${meta.id}`);
+          }}
+          className="mt-3 text-xs font-medium text-playhouse-text-secondary hover:text-playhouse-accent-secondary transition-colors"
+        >
+          ✨ Generate with AI
+        </button>
+      )}
     </div>
   );
 }

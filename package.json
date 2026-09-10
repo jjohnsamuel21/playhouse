@@ -5,11 +5,13 @@
     "packages/*"
   ],
   "scripts": {
+    "postinstall": "npm run build:shared",
+    "build:shared": "npm -w @games/shared run build",
     "dev:fe": "npm -w @games/frontend run dev",
     "dev:be": "npm -w @games/backend run dev",
-    "dev": "concurrently \"npm run dev:fe\" \"npm run dev:be\"",
-    "build:fe": "npm -w @games/frontend run build",
-    "build:be": "npm -w @games/backend run build",
+    "dev": "npm run build:shared && concurrently \"npm run dev:fe\" \"npm run dev:be\"",
+    "build:fe": "npm run build:shared && npm -w @games/frontend run build",
+    "build:be": "npm run build:shared && npm -w @games/backend run build",
     "migrate": "ts-node --project packages/backend/tsconfig.json -r tsconfig-paths/register scripts/migrate.ts",
     "seed:themes": "ts-node --project packages/backend/tsconfig.json -r tsconfig-paths/register scripts/seedThemes.ts"
   },

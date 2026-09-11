@@ -15,7 +15,7 @@ export const mostLikelyToPlugin: FrontendGamePlugin = {
     minPlayers: 3,
     maxPlayers: 8,
     supportsLLMGeneration: false,
-    supportsMultiplayer: false,
+    supportsMultiplayer: true,
     themeColor: 'indigo',
   },
   routes: [

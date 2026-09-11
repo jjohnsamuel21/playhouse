@@ -15,7 +15,7 @@ export const storyBuilderPlugin: FrontendGamePlugin = {
     minPlayers: 2,
     maxPlayers: 6,
     supportsLLMGeneration: false,
-    supportsMultiplayer: false,
+    supportsMultiplayer: true,
     themeColor: 'cyan',
   },
   routes: [

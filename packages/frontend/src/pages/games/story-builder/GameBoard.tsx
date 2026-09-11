@@ -3,7 +3,12 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { doc, getDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../../firebase';
 import { useAuth } from '../../../contexts/AuthContext';
+import { useSocket } from '../../../contexts/SocketContext';
 import type { StoryBuilderContent, ThemeDoc } from '@games/shared';
+import { SOCKET_EVENTS, type GameActionPayload } from '@games/shared';
+import ChatPanel from '../../../components/ChatPanel';
+import { MultiplayerBanners, GameEndedScreen } from '../../../components/MultiplayerBanners';
+import { useMultiplayerRoom } from '../../../hooks/useMultiplayerRoom';
 
 const TOTAL_LINES = 12;
 
@@ -12,15 +17,23 @@ interface LineRecord {
   player: string;
 }
 
+interface PlayerInfo { uid: string; displayName: string; photoURL: string; }
+
 export default function StoryGameBoard() {
   const { themeId } = useParams<{ themeId: string }>();
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { socket } = useSocket();
 
   const locationState = (location.state as {
     firstPlayer?: string;
     players?: string[];
+    sessionId?: string;
+    roomCode?: string;
+    playerIds?: string[];
+    playerInfos?: PlayerInfo[];
+    hostId?: string;
   }) ?? {};
 
   const [theme, setTheme] = useState<(ThemeDoc & { id: string }) | null>(null);
@@ -31,6 +44,7 @@ export default function StoryGameBoard() {
   const [loading, setLoading] = useState(true);
   const [done, setDone] = useState(false);
 
+  // Solo/local pass-and-play turn state
   const [players] = useState<string[]>(
     locationState.players ?? [user?.displayName ?? 'Player 1']
   );
@@ -40,18 +54,44 @@ export default function StoryGameBoard() {
   });
   const currentPlayer = players[playerIndex] ?? players[0];
 
+  // Multiplayer synced turn state
+  const [mpPlayerIds, setMpPlayerIds] = useState<string[]>(locationState.playerIds ?? []);
+  const [mpCurrentIndex, setMpCurrentIndex] = useState(0);
+
   const saveHistory = useCallback(async () => {
     if (!user || !themeId || !theme) return;
     await addDoc(collection(db, 'gameHistory'), {
       uid: user.uid,
-      sessionId: null,
+      sessionId: locationState.sessionId ?? null,
       gameId: 'story-builder',
       themeId,
       themeName: theme.name,
       result: { starter, lines: linesRef.current },
       playedAt: serverTimestamp(),
     });
-  }, [user, themeId, theme, starter]);
+  }, [user, themeId, theme, starter, locationState.sessionId]);
+
+  const {
+    isMultiplayer,
+    isHost,
+    disconnectedPlayers,
+    skippedNotices,
+    gameEndedBy,
+    playerInfoMapRef,
+    endGame,
+    dismissDisconnect,
+    dismissSkip,
+  } = useMultiplayerRoom({
+    sessionId: locationState.sessionId,
+    hostId: locationState.hostId,
+    playerInfos: locationState.playerInfos,
+    onGameEnded: saveHistory,
+  });
+
+  const mpCurrentUid = mpPlayerIds[mpCurrentIndex] ?? '';
+  const isMpCurrentPlayer = isMultiplayer && mpCurrentUid === user?.uid;
+  const mpCurrentName = playerInfoMapRef.current[mpCurrentUid] ?? 'Player';
+  const mpStoryComplete = isMultiplayer && lines.length >= TOTAL_LINES;
 
   useEffect(() => {
     if (!themeId) return;
@@ -66,9 +106,38 @@ export default function StoryGameBoard() {
     });
   }, [themeId]);
 
+  // Multiplayer state sync — server sends lines keyed by uid, map to display names
+  useEffect(() => {
+    if (!socket || !isMultiplayer) return;
+
+    socket.on(SOCKET_EVENTS.STATE_UPDATE, ({ state }: { state: {
+      currentPlayerIndex: number;
+      playerIds: string[];
+      lines?: { text: string; uid: string }[];
+    } }) => {
+      setMpCurrentIndex(state.currentPlayerIndex);
+      setMpPlayerIds(state.playerIds);
+      const mapped = (state.lines ?? []).map((l) => ({
+        text: l.text,
+        player: playerInfoMapRef.current[l.uid] ?? 'Player',
+      }));
+      linesRef.current = mapped;
+      setLines(mapped);
+    });
+
+    return () => { socket.off(SOCKET_EVENTS.STATE_UPDATE); };
+  }, [socket, isMultiplayer]);
+
   async function submitLine() {
     const text = input.trim();
     if (!text) return;
+
+    if (isMultiplayer) {
+      if (!isMpCurrentPlayer) return;
+      socket?.emit(SOCKET_EVENTS.GAME_ACTION, { type: 'ADD_LINE', text } as GameActionPayload);
+      setInput('');
+      return;
+    }
 
     const newLines = [...lines, { text, player: currentPlayer }];
     linesRef.current = newLines;
@@ -85,8 +154,9 @@ export default function StoryGameBoard() {
 
   if (loading) return <LoadingScreen />;
   if (!theme) return <div className="p-6 text-playhouse-text-secondary">No story found.</div>;
+  if (gameEndedBy) return <GameEndedScreen endedBy={gameEndedBy} />;
 
-  if (done) {
+  if (!isMultiplayer && done) {
     return (
       <div className="page-layer min-h-screen p-6">
         <div className="max-w-lg mx-auto space-y-6">
@@ -123,6 +193,13 @@ export default function StoryGameBoard() {
   return (
     <div className="page-layer min-h-screen p-6">
       <div className="max-w-lg mx-auto space-y-6">
+        <MultiplayerBanners
+          disconnectedPlayers={disconnectedPlayers}
+          skippedNotices={skippedNotices}
+          onDismissDisconnect={dismissDisconnect}
+          onDismissSkip={dismissSkip}
+        />
+
         <div>
           <span
             onClick={() => navigate(-1)}
@@ -143,27 +220,57 @@ export default function StoryGameBoard() {
           </p>
         </div>
 
-        <div>
-          {players.length > 1 && (
-            <p className="font-display font-bold text-lg mb-2 text-playhouse-text-primary">{currentPlayer}'s turn</p>
-          )}
-          <textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Add the next line…"
-            rows={2}
-            className="w-full bg-playhouse-bg border border-white/10 rounded-xl p-3 text-playhouse-text-primary placeholder:text-playhouse-text-tertiary resize-none focus:outline-none focus:border-playhouse-accent-primary transition-colors"
-          />
-          <button
-            onClick={submitLine}
-            disabled={!input.trim()}
-            className="w-full mt-3 py-3 rounded-xl font-bold text-white disabled:opacity-40 transition-opacity hover:opacity-90"
-            style={{ background: 'linear-gradient(135deg,#fbbf24,#f472b6)' }}
-          >
-            {lines.length + 1 >= TOTAL_LINES ? 'Finish Story' : 'Add Line →'}
+        {!mpStoryComplete && (
+          <div>
+            {!isMultiplayer && players.length > 1 && (
+              <p className="font-display font-bold text-lg mb-2 text-playhouse-text-primary">{currentPlayer}'s turn</p>
+            )}
+            {isMultiplayer && (
+              <p className="font-display font-bold text-lg mb-2 text-playhouse-text-primary">
+                {isMpCurrentPlayer ? 'Your turn' : `${mpCurrentName}'s turn`}
+              </p>
+            )}
+            <textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder={isMultiplayer && !isMpCurrentPlayer ? `Waiting for ${mpCurrentName}…` : 'Add the next line…'}
+              rows={2}
+              disabled={isMultiplayer && !isMpCurrentPlayer}
+              className="w-full bg-playhouse-bg border border-white/10 rounded-xl p-3 text-playhouse-text-primary placeholder:text-playhouse-text-tertiary resize-none focus:outline-none focus:border-playhouse-accent-primary transition-colors disabled:opacity-50"
+            />
+            <button
+              onClick={submitLine}
+              disabled={!input.trim() || (isMultiplayer && !isMpCurrentPlayer)}
+              className="w-full mt-3 py-3 rounded-xl font-bold text-white disabled:opacity-40 transition-opacity hover:opacity-90"
+              style={{ background: 'linear-gradient(135deg,#fbbf24,#f472b6)' }}
+            >
+              {lines.length + 1 >= TOTAL_LINES ? 'Finish Story' : 'Add Line →'}
+            </button>
+          </div>
+        )}
+
+        {mpStoryComplete && (
+          isHost ? (
+            <button
+              onClick={endGame}
+              className="w-full py-3 rounded-xl font-bold text-white transition-opacity hover:opacity-90"
+              style={{ background: 'linear-gradient(135deg,#e0479e,#a855f7)' }}
+            >
+              Finish Story
+            </button>
+          ) : (
+            <p className="text-center text-playhouse-text-tertiary text-xs">Waiting for host to finish…</p>
+          )
+        )}
+
+        {isMultiplayer && isHost && !mpStoryComplete && (
+          <button onClick={endGame} className="w-full text-playhouse-text-tertiary hover:text-playhouse-text-secondary text-sm transition-colors">
+            End Game for Everyone
           </button>
-        </div>
+        )}
       </div>
+
+      {locationState.sessionId && <ChatPanel sessionId={locationState.sessionId} />}
     </div>
   );
 }

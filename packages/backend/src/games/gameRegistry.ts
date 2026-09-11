@@ -3,6 +3,9 @@ import type { GameId, ThemeContent } from '@games/shared';
 import { truthOrDarePlugin } from './plugins/truthOrDarePlugin';
 import { thisOrThatPlugin } from './plugins/thisOrThatPlugin';
 import { rankingPlugin } from './plugins/rankingPlugin';
+import { triviaPlugin } from './plugins/triviaPlugin';
+import { mostLikelyToPlugin } from './plugins/mostLikelyToPlugin';
+import { storyBuilderPlugin } from './plugins/storyBuilderPlugin';
 
 export interface GameSession {
   sessionId: string;
@@ -25,6 +28,9 @@ const plugins: Map<GameId, ServerGamePlugin> = new Map([
   ['truth-or-dare', truthOrDarePlugin],
   ['this-or-that', thisOrThatPlugin],
   ['ranking', rankingPlugin],
+  ['trivia', triviaPlugin],
+  ['most-likely-to', mostLikelyToPlugin],
+  ['story-builder', storyBuilderPlugin],
 ]);
 
 export function getPlugin(gameId: GameId): ServerGamePlugin {

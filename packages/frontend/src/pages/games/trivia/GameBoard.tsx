@@ -4,12 +4,17 @@ import { doc, getDoc, addDoc, collection, serverTimestamp } from 'firebase/fires
 import { db } from '../../../firebase';
 import { useAuth } from '../../../contexts/AuthContext';
 import type { TriviaContent, ThemeDoc } from '@games/shared';
+import ChatPanel from '../../../components/ChatPanel';
+import { MultiplayerBanners, GameEndedScreen } from '../../../components/MultiplayerBanners';
+import { useMultiplayerRoom } from '../../../hooks/useMultiplayerRoom';
 
 interface AnswerRecord {
   question: string;
   player: string;
   correct: boolean;
 }
+
+interface PlayerInfo { uid: string; displayName: string; photoURL: string; }
 
 export default function TriviaGameBoard() {
   const { themeId } = useParams<{ themeId: string }>();
@@ -20,6 +25,10 @@ export default function TriviaGameBoard() {
   const locationState = (location.state as {
     firstPlayer?: string;
     players?: string[];
+    sessionId?: string;
+    roomCode?: string;
+    playerInfos?: PlayerInfo[];
+    hostId?: string;
   }) ?? {};
 
   const [theme, setTheme] = useState<(ThemeDoc & { id: string }) | null>(null);
@@ -44,14 +53,30 @@ export default function TriviaGameBoard() {
     if (!user || !themeId || !theme) return;
     await addDoc(collection(db, 'gameHistory'), {
       uid: user.uid,
-      sessionId: null,
+      sessionId: locationState.sessionId ?? null,
       gameId: 'trivia',
       themeId,
       themeName: theme.name,
       result: { scores, answers: answersRef.current },
       playedAt: serverTimestamp(),
     });
-  }, [user, themeId, theme, scores]);
+  }, [user, themeId, theme, scores, locationState.sessionId]);
+
+  const {
+    isMultiplayer,
+    isHost,
+    disconnectedPlayers,
+    skippedNotices,
+    gameEndedBy,
+    endGame,
+    dismissDisconnect,
+    dismissSkip,
+  } = useMultiplayerRoom({
+    sessionId: locationState.sessionId,
+    hostId: locationState.hostId,
+    playerInfos: locationState.playerInfos,
+    onGameEnded: saveHistory,
+  });
 
   useEffect(() => {
     if (!themeId) return;
@@ -97,6 +122,7 @@ export default function TriviaGameBoard() {
   if (!theme || questions.length === 0) {
     return <div className="p-6 text-playhouse-text-secondary">No questions found.</div>;
   }
+  if (gameEndedBy) return <GameEndedScreen endedBy={gameEndedBy} />;
 
   if (done) {
     const leaderboard = [...players].sort((a, b) => (scores[b] ?? 0) - (scores[a] ?? 0));
@@ -130,8 +156,15 @@ export default function TriviaGameBoard() {
   return (
     <div className="page-layer min-h-screen flex flex-col items-center justify-center p-6">
       <div className="w-full max-w-md space-y-6">
+        <MultiplayerBanners
+          disconnectedPlayers={disconnectedPlayers}
+          skippedNotices={skippedNotices}
+          onDismissDisconnect={dismissDisconnect}
+          onDismissSkip={dismissSkip}
+        />
+
         <div className="text-center">
-          {players.length > 1 && (
+          {!isMultiplayer && players.length > 1 && (
             <p className="font-display font-bold text-lg mb-1 text-playhouse-text-primary">{currentPlayer}'s turn</p>
           )}
           <p className="text-playhouse-text-secondary text-sm">{theme.name}</p>
@@ -179,7 +212,15 @@ export default function TriviaGameBoard() {
             {round + 1 >= questions.length ? 'See Results →' : 'Next Question →'}
           </button>
         )}
+
+        {isMultiplayer && isHost && (
+          <button onClick={endGame} className="w-full text-playhouse-text-tertiary hover:text-playhouse-text-secondary text-sm transition-colors">
+            End Game for Everyone
+          </button>
+        )}
       </div>
+
+      {locationState.sessionId && <ChatPanel sessionId={locationState.sessionId} />}
     </div>
   );
 }

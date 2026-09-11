@@ -15,7 +15,7 @@ export const triviaPlugin: FrontendGamePlugin = {
     minPlayers: 1,
     maxPlayers: 6,
     supportsLLMGeneration: false,
-    supportsMultiplayer: false,
+    supportsMultiplayer: true,
     themeColor: 'violet',
   },
   routes: [
